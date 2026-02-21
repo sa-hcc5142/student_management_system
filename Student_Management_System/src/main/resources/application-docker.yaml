@@ -1,0 +1,6 @@
+# Used when running inside Docker (docker-compose sets POSTGRES_* and SPRING_PROFILES_ACTIVE=docker)
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres:5432/school
+    username: school
+    password: school

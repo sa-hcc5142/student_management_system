@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School - Welcome</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%);
+            color: #333;
+            padding: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 12px 48px rgba(0,0,0,0.2);
+            max-width: 480px;
+            width: 100%;
+            text-align: center;
+        }
+        h1 { color: #1e3a5f; margin-top: 0; font-size: 1.75rem; }
+        .welcome-msg { color: #555; margin-bottom: 0.5rem; font-size: 1rem; }
+        .user-name { font-weight: 600; color: #1e3a5f; }
+        .role-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .role-teacher { background: #e3f2fd; color: #1565c0; }
+        .role-student { background: #e8f5e9; color: #2e7d32; }
+        .links { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; align-items: center; margin-top: 1.5rem; }
+        .btn {
+            display: inline-block;
+            padding: 0.65rem 1.35rem;
+            background: #2d5a87;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .btn:hover { background: #1e3a5f; }
+        .btn-secondary {
+            background: #5c6bc0;
+            color: white;
+        }
+        .btn-secondary:hover { background: #3f51b5; }
+        .btn-outline {
+            background: transparent;
+            color: #666;
+            border: 2px solid #ddd;
+        }
+        .btn-outline:hover { background: #f5f5f5; border-color: #999; }
+        .loading { color: #666; }
+        .error { color: #c00; margin-bottom: 1rem; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>School</h1>
+        <div id="content">
+            <p class="loading">Loading…</p>
+        </div>
+        <div id="links" class="links" style="display:none;">
+            <a href="/students.html" id="main-link" class="btn">View students</a>
+            <a href="/classes.html" id="classes-link" class="btn btn-secondary">Classes</a>
+            <a href="/register.html" id="register-link" class="btn btn-outline" style="display:none;">Register user</a>
+            <form method="post" action="/logout" style="display:inline;">
+                <button type="submit" class="btn btn-outline">Log out</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        (function () {
+            var content = document.getElementById('content');
+            var links = document.getElementById('links');
+            var mainLink = document.getElementById('main-link');
+            var classesLink = document.getElementById('classes-link');
+            var registerLink = document.getElementById('register-link');
+
+            fetch('/api/auth/me', { credentials: 'same-origin' })
+                .then(function (r) {
+                    if (!r.ok) throw new Error('Not logged in');
+                    return r.json();
+                })
+                .then(function (me) {
+                    var name = me.name || me.username || 'User';
+                    var isTeacher = me.role === 'TEACHER';
+                    content.innerHTML =
+                        '<p class="welcome-msg">Welcome, <span class="user-name">' + escapeHtml(name) + '</span></p>' +
+                        '<span class="role-badge ' + (isTeacher ? 'role-teacher' : 'role-student') + '">' +
+                        (isTeacher ? 'Teacher' : 'Student') + '</span>';
+                    mainLink.textContent = isTeacher ? 'Manage students' : 'My information';
+                    mainLink.href = '/students.html';
+                    classesLink.textContent = isTeacher ? 'My classes' : 'Browse classes';
+                    classesLink.href = '/classes.html';
+                    if (isTeacher) registerLink.style.display = 'inline-block';
+                    links.style.display = 'flex';
+                })
+                .catch(function () {
+                    content.innerHTML = '<p class="error">Please <a href="/login.html" style="color:#1565c0;font-weight:600;">log in</a>.</p>';
+                });
+
+            function escapeHtml(s) {
+                var div = document.createElement('div');
+                div.textContent = s;
+                return div.innerHTML;
+            }
+        })();
+    </script>
+</body>
+</html>

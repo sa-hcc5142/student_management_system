@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School - Students</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%);
+            color: #333;
+            padding: 1rem;
+        }
+        @media (min-width: 600px) { body { padding: 2rem; } }
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 12px 48px rgba(0,0,0,0.2);
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .page-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .page-header h1 { color: #1e3a5f; margin: 0; font-size: 1.5rem; }
+        .role-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .role-teacher { background: #e3f2fd; color: #1565c0; }
+        .role-student { background: #e8f5e9; color: #2e7d32; }
+        .nav-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: #2d5a87;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .btn:hover { background: #1e3a5f; }
+        .btn-secondary { background: #5c6bc0; }
+        .btn-secondary:hover { background: #3f51b5; }
+        .btn-danger { background: #c62828; }
+        .btn-danger:hover { background: #b71c1c; }
+        .btn-small { padding: 0.35rem 0.75rem; font-size: 0.85rem; }
+        .btn-group { display: inline-flex; gap: 0.35rem; flex-wrap: wrap; }
+        /* Teacher table */
+        .table-wrap { overflow-x: auto; margin-top: 1rem; border-radius: 10px; border: 1px solid #e0e0e0; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid #eee; }
+        th {
+            background: #f5f5f5;
+            color: #1e3a5f;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #fafafa; }
+        .error { color: #c62828; padding: 1rem; background: #ffebee; border-radius: 8px; margin-top: 1rem; }
+        .loading { color: #666; margin-top: 1rem; }
+        /* Form panel */
+        .form-panel {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            border: 1px solid #e9ecef;
+        }
+        .form-panel h3 { margin: 0 0 1rem 0; color: #1e3a5f; font-size: 1.1rem; }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .form-row { display: flex; flex-direction: column; gap: 0.25rem; }
+        .form-row label { font-weight: 600; font-size: 0.85rem; color: #444; }
+        .form-row input {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+        .form-row input:focus {
+            outline: none;
+            border-color: #2d5a87;
+            box-shadow: 0 0 0 2px rgba(45, 90, 135, 0.2);
+        }
+        .form-actions { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+        /* Student profile */
+        .profile-card {
+            margin-top: 1rem;
+            padding: 1.5rem;
+            background: linear-gradient(145deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            border: 1px solid #dee2e6;
+        }
+        .profile-card h2 {
+            margin: 0 0 1rem 0;
+            font-size: 1.1rem;
+            color: #1e3a5f;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #2d5a87;
+        }
+        .profile-row {
+            display: flex;
+            align-items: center;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .profile-row:last-child { border-bottom: none; }
+        .profile-label { font-weight: 600; color: #555; min-width: 100px; }
+        .profile-value { color: #222; }
+        .empty-msg { color: #666; padding: 1.5rem; text-align: center; background: #f8f9fa; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="page-header">
+            <h1 id="title">Students</h1>
+            <span id="role-badge" class="role-badge" style="display:none;"></span>
+        </div>
+        <div class="nav-actions">
+            <a href="/welcome.html" class="btn btn-secondary">← Back</a>
+            <span id="teacher-actions" style="display:none;">
+                <button type="button" class="btn" id="btn-create">+ Create student</button>
+            </span>
+        </div>
+
+        <div id="form-panel" class="form-panel" style="display:none;">
+            <h3 id="form-title">Create student</h3>
+            <input type="hidden" id="edit-id" value="">
+            <div class="form-grid">
+                <div class="form-row">
+                    <label for="in-username">Username</label>
+                    <input type="text" id="in-username" required>
+                </div>
+                <div class="form-row">
+                    <label for="in-password">Password</label>
+                    <input type="text" id="in-password" placeholder="(leave blank to keep)">
+                </div>
+                <div class="form-row">
+                    <label for="in-name">Name</label>
+                    <input type="text" id="in-name">
+                </div>
+                <div class="form-row">
+                    <label for="in-email">Email</label>
+                    <input type="text" id="in-email">
+                </div>
+                <div class="form-row">
+                    <label for="in-grade">Grade</label>
+                    <input type="text" id="in-grade">
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn" id="btn-save">Save</button>
+                <button type="button" class="btn btn-secondary" id="btn-cancel">Cancel</button>
+            </div>
+        </div>
+
+        <div id="content">
+            <p class="loading">Loading…</p>
+        </div>
+    </div>
+    <script>
+        (function () {
+            var content = document.getElementById('content');
+            var teacherActions = document.getElementById('teacher-actions');
+            var title = document.getElementById('title');
+            var roleBadge = document.getElementById('role-badge');
+            var formPanel = document.getElementById('form-panel');
+            var formTitle = document.getElementById('form-title');
+            var editId = document.getElementById('edit-id');
+            var isTeacher = false;
+
+            function escapeHtml(s) {
+                if (s == null) return '';
+                var div = document.createElement('div');
+                div.textContent = s;
+                return div.innerHTML;
+            }
+
+            function showError(msg) {
+                content.innerHTML = '<p class="error">' + escapeHtml(msg) + '</p>';
+            }
+
+            function load() {
+                fetch('/api/auth/me', { credentials: 'same-origin' })
+                    .then(function (r) {
+                        if (!r.ok) throw new Error('Please log in.');
+                        return r.json();
+                    })
+                    .then(function (me) {
+                        isTeacher = me.role === 'TEACHER';
+                        title.textContent = isTeacher ? 'Students' : 'My information';
+                        roleBadge.textContent = isTeacher ? 'Teacher' : 'Student';
+                        roleBadge.className = 'role-badge ' + (isTeacher ? 'role-teacher' : 'role-student');
+                        roleBadge.style.display = 'inline-block';
+                        if (isTeacher) teacherActions.style.display = 'inline';
+                        return fetch('/api/students', { credentials: 'same-origin' });
+                    })
+                    .then(function (r) {
+                        if (!r.ok) throw new Error(r.status === 401 ? 'Please log in.' : 'Request failed.');
+                        return r.json();
+                    })
+                    .then(function (data) {
+                        if (!Array.isArray(data)) { showError('Invalid response.'); return; }
+                        if (!isTeacher) data = data.slice(0, 1);
+                        if (isTeacher) {
+                            if (data.length === 0) {
+                                content.innerHTML = '<p class="empty-msg">No students yet. Click <strong>Create student</strong> to add one.</p>';
+                                return;
+                            }
+                            var table = '<div class="table-wrap"><table><thead><tr><th>ID</th><th>Username</th><th>Name</th><th>Email</th><th>Grade</th><th>Actions</th></tr></thead><tbody>';
+                            data.forEach(function (s) {
+                                table += '<tr><td>' + escapeHtml(s.id) + '</td><td>' + escapeHtml(s.username) + '</td><td>' + escapeHtml(s.name) + '</td><td>' + escapeHtml(s.email) + '</td><td>' + escapeHtml(s.grade) + '</td><td><div class="btn-group">' +
+                                    '<button type="button" class="btn btn-small" data-id="' + s.id + '" data-edit>Edit</button>' +
+                                    '<button type="button" class="btn btn-small btn-danger" data-id="' + s.id + '" data-delete>Delete</button></div></td></tr>';
+                            });
+                            table += '</tbody></table></div>';
+                            content.innerHTML = table;
+                            content.querySelectorAll('[data-edit]').forEach(function (btn) {
+                                btn.addEventListener('click', function () { openEdit(Number(btn.getAttribute('data-id'))); });
+                            });
+                            content.querySelectorAll('[data-delete]').forEach(function (btn) {
+                                btn.addEventListener('click', function () { doDelete(Number(btn.getAttribute('data-id'))); });
+                            });
+                        } else {
+                            var myData = data.length > 0 ? data[0] : null;
+                            if (!myData) {
+                                content.innerHTML = '<p class="empty-msg">No information to show.</p>';
+                                return;
+                            }
+                            var s = myData;
+                            content.innerHTML = '<div class="profile-card">' +
+                                '<h2>Your profile</h2>' +
+                                '<div class="profile-row"><span class="profile-label">ID</span><span class="profile-value">' + escapeHtml(s.id) + '</span></div>' +
+                                '<div class="profile-row"><span class="profile-label">Username</span><span class="profile-value">' + escapeHtml(s.username) + '</span></div>' +
+                                '<div class="profile-row"><span class="profile-label">Name</span><span class="profile-value">' + escapeHtml(s.name) + '</span></div>' +
+                                '<div class="profile-row"><span class="profile-label">Email</span><span class="profile-value">' + escapeHtml(s.email) + '</span></div>' +
+                                '<div class="profile-row"><span class="profile-label">Grade</span><span class="profile-value">' + escapeHtml(s.grade) + '</span></div>' +
+                                '</div>';
+                        }
+                    })
+                    .catch(function (err) {
+                        showError(err.message || 'Could not load.');
+                    });
+            }
+
+            function openCreate() {
+                editId.value = '';
+                formTitle.textContent = 'Create student';
+                document.getElementById('in-username').value = '';
+                document.getElementById('in-password').value = '';
+                document.getElementById('in-password').placeholder = '';
+                document.getElementById('in-name').value = '';
+                document.getElementById('in-email').value = '';
+                document.getElementById('in-grade').value = '';
+                formPanel.style.display = 'block';
+            }
+
+            function openEdit(id) {
+                fetch('/api/students/' + id, { credentials: 'same-origin' })
+                    .then(function (r) { return r.ok ? r.json() : Promise.reject(new Error('Failed to load')); })
+                    .then(function (s) {
+                        editId.value = id;
+                        formTitle.textContent = 'Edit student';
+                        document.getElementById('in-username').value = s.username || '';
+                        document.getElementById('in-username').readOnly = true;
+                        document.getElementById('in-password').value = '';
+                        document.getElementById('in-password').placeholder = '(leave blank to keep)';
+                        document.getElementById('in-name').value = s.name || '';
+                        document.getElementById('in-email').value = s.email || '';
+                        document.getElementById('in-grade').value = s.grade || '';
+                        formPanel.style.display = 'block';
+                    })
+                    .catch(function () { showError('Could not load student.'); });
+            }
+
+            function doDelete(id) {
+                if (!confirm('Delete this student?')) return;
+                fetch('/api/students/' + id, { method: 'DELETE', credentials: 'same-origin' })
+                    .then(function (r) {
+                        if (!r.ok) throw new Error('Delete failed');
+                        formPanel.style.display = 'none';
+                        load();
+                    })
+                    .catch(function () { showError('Could not delete.'); });
+            }
+
+            document.getElementById('btn-create').addEventListener('click', function () {
+                document.getElementById('in-username').readOnly = false;
+                openCreate();
+            });
+            document.getElementById('btn-cancel').addEventListener('click', function () {
+                formPanel.style.display = 'none';
+                document.getElementById('in-username').readOnly = false;
+            });
+            document.getElementById('btn-save').addEventListener('click', function () {
+                var id = editId.value;
+                var payload = {
+                    name: document.getElementById('in-name').value,
+                    email: document.getElementById('in-email').value,
+                    grade: document.getElementById('in-grade').value
+                };
+                if (!id) {
+                    payload.username = document.getElementById('in-username').value.trim();
+                    if (!payload.username) { alert('Username required'); return; }
+                    payload.password = document.getElementById('in-password').value || 'changeme';
+                } else {
+                    if (document.getElementById('in-password').value) payload.password = document.getElementById('in-password').value;
+                }
+                var url = id ? '/api/students/' + id : '/api/students';
+                var opts = { method: id ? 'PATCH' : 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) };
+                fetch(url, opts)
+                    .then(function (r) {
+                        if (!r.ok) throw new Error(r.status === 400 ? 'Invalid data or username taken' : 'Request failed');
+                        formPanel.style.display = 'none';
+                        load();
+                    })
+                    .catch(function (e) { alert(e.message); });
+            });
+
+            load();
+        })();
+    </script>
+</body>
+</html>

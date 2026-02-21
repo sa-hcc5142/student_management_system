@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School - Login</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%);
+            color: #333;
+        }
+        .card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 12px 48px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 380px;
+        }
+        h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.5rem;
+            color: #1e3a5f;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.35rem;
+            font-size: 0.9rem;
+        }
+        input {
+            width: 100%;
+            padding: 0.6rem 0.75rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+        input:focus {
+            outline: none;
+            border-color: #2d5a87;
+            box-shadow: 0 0 0 3px rgba(45, 90, 135, 0.2);
+        }
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            background: #2d5a87;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 0.25rem;
+        }
+        button:hover {
+            background: #1e3a5f;
+        }
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 0.6rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        .hint {
+            margin-top: 1.25rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+            font-size: 0.8rem;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>School</h1>
+        <p class="subtitle">Sign in as teacher or student</p>
+
+        <div id="error" class="error" style="display: none;">Invalid username or password.</div>
+
+        <form method="post" action="/login">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required autocomplete="username" placeholder="teacher or student">
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="Password">
+
+            <button type="submit">Log in</button>
+        </form>
+
+        <p class="hint">Default: teacher / teacher &nbsp; or &nbsp; student / student</p>
+    </div>
+    <script>
+        if (window.location.search.includes('error=true')) {
+            document.getElementById('error').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

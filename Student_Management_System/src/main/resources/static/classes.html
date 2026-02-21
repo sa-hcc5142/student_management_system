@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School - Classes</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%);
+            color: #333;
+            padding: 1rem;
+        }
+        @media (min-width: 600px) { body { padding: 2rem; } }
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 12px 48px rgba(0,0,0,0.2);
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .page-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .page-header h1 { color: #1e3a5f; margin: 0; font-size: 1.5rem; }
+        .role-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .role-teacher { background: #e3f2fd; color: #1565c0; }
+        .role-student { background: #e8f5e9; color: #2e7d32; }
+        .nav-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-bottom: 1rem; }
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: #2d5a87;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .btn:hover { background: #1e3a5f; }
+        .btn-secondary { background: #5c6bc0; }
+        .btn-secondary:hover { background: #3f51b5; }
+        .btn-danger { background: #c62828; }
+        .btn-danger:hover { background: #b71c1c; }
+        .btn-success { background: #2e7d32; }
+        .btn-success:hover { background: #1b5e20; }
+        .btn-small { padding: 0.35rem 0.75rem; font-size: 0.85rem; }
+        .btn-group { display: inline-flex; gap: 0.35rem; flex-wrap: wrap; }
+        .table-wrap { overflow-x: auto; margin-top: 1rem; border-radius: 10px; border: 1px solid #e0e0e0; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid #eee; }
+        th { background: #f5f5f5; color: #1e3a5f; font-weight: 600; font-size: 0.9rem; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #fafafa; }
+        .error { color: #c62828; padding: 1rem; background: #ffebee; border-radius: 8px; margin-top: 1rem; }
+        .loading { color: #666; margin-top: 1rem; }
+        .form-panel {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            border: 1px solid #e9ecef;
+        }
+        .form-panel h3 { margin: 0 0 1rem 0; color: #1e3a5f; font-size: 1.1rem; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+        .form-row { display: flex; flex-direction: column; gap: 0.25rem; }
+        .form-row label { font-weight: 600; font-size: 0.85rem; color: #444; }
+        .form-row input, .form-row textarea {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+        .form-row textarea { min-height: 80px; resize: vertical; }
+        .form-row input:focus, .form-row textarea:focus {
+            outline: none; border-color: #2d5a87; box-shadow: 0 0 0 2px rgba(45, 90, 135, 0.2);
+        }
+        .form-actions { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+        .class-list { margin-top: 1rem; }
+        .class-item {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+        }
+        .class-item.enrolled { border-color: #2e7d32; background: #e8f5e9; }
+        .class-info { flex: 1; min-width: 180px; }
+        .class-name { font-weight: 600; color: #1e3a5f; margin-bottom: 0.25rem; }
+        .class-meta { font-size: 0.9rem; color: #666; }
+        .empty-msg { color: #666; padding: 1.5rem; text-align: center; background: #f8f9fa; border-radius: 8px; }
+        .enrollments-row td { background: #f8f9fa; padding: 0.75rem 1rem; border-bottom: 1px solid #e0e0e0; vertical-align: top; }
+        .enrollments-row .enrollments-inner { padding: 0.5rem 0; }
+        .enrollments-row table { margin: 0; font-size: 0.9rem; }
+        .enrollments-row th { background: #e9ecef; padding: 0.4rem 0.75rem; }
+        .enrollments-row td { padding: 0.4rem 0.75rem; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="page-header">
+            <h1 id="title">Classes</h1>
+            <span id="role-badge" class="role-badge" style="display:none;"></span>
+        </div>
+        <div class="nav-actions">
+            <a href="/welcome.html" class="btn btn-secondary">← Back</a>
+            <span id="teacher-actions" style="display:none;">
+                <button type="button" class="btn" id="btn-create">+ Create class</button>
+            </span>
+        </div>
+
+        <div id="form-panel" class="form-panel" style="display:none;">
+            <h3 id="form-title">Create class</h3>
+            <input type="hidden" id="edit-id" value="">
+            <div class="form-grid">
+                <div class="form-row" style="grid-column: 1 / -1;">
+                    <label for="in-name">Name</label>
+                    <input type="text" id="in-name" required placeholder="e.g. Math 101">
+                </div>
+                <div class="form-row" style="grid-column: 1 / -1;">
+                    <label for="in-description">Description</label>
+                    <textarea id="in-description" placeholder="Optional description"></textarea>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn" id="btn-save">Save</button>
+                <button type="button" class="btn btn-secondary" id="btn-cancel">Cancel</button>
+            </div>
+        </div>
+
+        <div id="content">
+            <p class="loading">Loading…</p>
+        </div>
+    </div>
+    <script>
+        (function () {
+            var content = document.getElementById('content');
+            var teacherActions = document.getElementById('teacher-actions');
+            var title = document.getElementById('title');
+            var roleBadge = document.getElementById('role-badge');
+            var formPanel = document.getElementById('form-panel');
+            var formTitle = document.getElementById('form-title');
+            var editId = document.getElementById('edit-id');
+            var isTeacher = false;
+
+            function escapeHtml(s) {
+                if (s == null) return '';
+                var div = document.createElement('div');
+                div.textContent = s;
+                return div.innerHTML;
+            }
+
+            function showError(msg) {
+                content.innerHTML = '<p class="error">' + escapeHtml(msg) + '</p>';
+            }
+
+            function load() {
+                fetch('/api/auth/me', { credentials: 'same-origin' })
+                    .then(function (r) {
+                        if (!r.ok) throw new Error('Please log in.');
+                        return r.json();
+                    })
+                    .then(function (me) {
+                        isTeacher = me.role === 'TEACHER';
+                        title.textContent = isTeacher ? 'My classes' : 'Classes';
+                        roleBadge.textContent = isTeacher ? 'Teacher' : 'Student';
+                        roleBadge.className = 'role-badge ' + (isTeacher ? 'role-teacher' : 'role-student');
+                        roleBadge.style.display = 'inline-block';
+                        if (isTeacher) teacherActions.style.display = 'inline';
+                        return fetch('/api/classes', { credentials: 'same-origin' });
+                    })
+                    .then(function (r) {
+                        if (!r.ok) throw new Error(r.status === 401 ? 'Please log in.' : 'Request failed.');
+                        return r.json();
+                    })
+                    .then(function (data) {
+                        if (!Array.isArray(data)) { showError('Invalid response.'); return; }
+                        if (isTeacher) {
+                            if (data.length === 0) {
+                                content.innerHTML = '<p class="empty-msg">No classes yet. Click <strong>Create class</strong> to add one.</p>';
+                                return;
+                            }
+                            var table = '<div class="table-wrap"><table><thead><tr><th>Name</th><th>Description</th><th>Enrolled</th><th>Actions</th></tr></thead><tbody>';
+                            data.forEach(function (c) {
+                                var count = c.enrollmentCount != null ? c.enrollmentCount : 0;
+                                table += '<tr><td>' + escapeHtml(c.name) + '</td><td>' + escapeHtml(c.description || '—') + '</td><td>' + count + '</td><td><div class="btn-group">' +
+                                    '<button type="button" class="btn btn-small" data-id="' + c.id + '" data-view-enrollments>View enrolled</button>' +
+                                    '<button type="button" class="btn btn-small" data-id="' + c.id + '" data-edit>Edit</button>' +
+                                    '<button type="button" class="btn btn-small btn-danger" data-id="' + c.id + '" data-delete>Delete</button></div></td></tr>';
+                                table += '<tr id="enrollments-row-' + c.id + '" class="enrollments-row" style="display:none;"><td colspan="4"><div class="enrollments-inner" id="enrollments-content-' + c.id + '">Loading…</div></td></tr>';
+                            });
+                            table += '</tbody></table></div>';
+                            content.innerHTML = table;
+                            content.querySelectorAll('[data-view-enrollments]').forEach(function (btn) {
+                                btn.addEventListener('click', function () { toggleEnrollments(Number(btn.getAttribute('data-id'))); });
+                            });
+                            content.querySelectorAll('[data-edit]').forEach(function (btn) {
+                                btn.addEventListener('click', function () { openEdit(Number(btn.getAttribute('data-id'))); });
+                            });
+                            content.querySelectorAll('[data-delete]').forEach(function (btn) {
+                                btn.addEventListener('click', function () { doDelete(Number(btn.getAttribute('data-id'))); });
+                            });
+                        } else {
+                            if (data.length === 0) {
+                                content.innerHTML = '<p class="empty-msg">No classes available to enroll in.</p>';
+                                return;
+                            }
+                            var html = '<div class="class-list">';
+                            data.forEach(function (c) {
+                                var enrolled = c.enrolled === true;
+                                html += '<div class="class-item' + (enrolled ? ' enrolled' : '') + '" data-id="' + c.id + '">';
+                                html += '<div class="class-info"><div class="class-name">' + escapeHtml(c.name) + '</div>';
+                                html += '<div class="class-meta">' + escapeHtml(c.description || '') + (c.teacherName ? ' · ' + escapeHtml(c.teacherName) : '') + '</div></div>';
+                                html += '<div class="btn-group">';
+                                if (enrolled) {
+                                    html += '<button type="button" class="btn btn-small btn-danger" data-unenroll>Unenroll</button>';
+                                } else {
+                                    html += '<button type="button" class="btn btn-small btn-success" data-enroll>Enroll</button>';
+                                }
+                                html += '</div></div>';
+                            });
+                            html += '</div>';
+                            content.innerHTML = html;
+                            content.querySelectorAll('[data-enroll]').forEach(function (btn) {
+                                var id = Number(btn.closest('.class-item').getAttribute('data-id'));
+                                btn.addEventListener('click', function () { doEnroll(id); });
+                            });
+                            content.querySelectorAll('[data-unenroll]').forEach(function (btn) {
+                                var id = Number(btn.closest('.class-item').getAttribute('data-id'));
+                                btn.addEventListener('click', function () { doUnenroll(id); });
+                            });
+                        }
+                    })
+                    .catch(function (err) { showError(err.message || 'Could not load.'); });
+            }
+
+            function openCreate() {
+                editId.value = '';
+                formTitle.textContent = 'Create class';
+                document.getElementById('in-name').value = '';
+                document.getElementById('in-description').value = '';
+                formPanel.style.display = 'block';
+            }
+
+            function openEdit(id) {
+                fetch('/api/classes/' + id, { credentials: 'same-origin' })
+                    .then(function (r) { return r.ok ? r.json() : Promise.reject(new Error('Failed to load')); })
+                    .then(function (c) {
+                        editId.value = id;
+                        formTitle.textContent = 'Edit class';
+                        document.getElementById('in-name').value = c.name || '';
+                        document.getElementById('in-description').value = c.description || '';
+                        formPanel.style.display = 'block';
+                    })
+                    .catch(function () { showError('Could not load class.'); });
+            }
+
+            function doDelete(id) {
+                if (!confirm('Delete this class? Enrolled students will be removed.')) return;
+                fetch('/api/classes/' + id, { method: 'DELETE', credentials: 'same-origin' })
+                    .then(function (r) {
+                        if (!r.ok) throw new Error('Delete failed');
+                        formPanel.style.display = 'none';
+                        load();
+                    })
+                    .catch(function () { showError('Could not delete.'); });
+            }
+
+            function doEnroll(id) {
+                fetch('/api/classes/' + id + '/enroll', { method: 'POST', credentials: 'same-origin' })
+                    .then(function (r) {
+                        if (!r.ok) throw new Error('Enroll failed');
+                        load();
+                    })
+                    .catch(function () { showError('Could not enroll.'); });
+            }
+
+            function doUnenroll(id) {
+                fetch('/api/classes/' + id + '/enroll', { method: 'DELETE', credentials: 'same-origin' })
+                    .then(function (r) {
+                        if (!r.ok) throw new Error('Unenroll failed');
+                        load();
+                    })
+                    .catch(function () { showError('Could not unenroll.'); });
+            }
+
+            function toggleEnrollments(classId) {
+                var row = document.getElementById('enrollments-row-' + classId);
+                var content = document.getElementById('enrollments-content-' + classId);
+                if (!row || !content) return;
+                if (row.style.display === 'none') {
+                    row.style.display = 'table-row';
+                    loadEnrollments(classId, content);
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+
+            function loadEnrollments(classId, contentEl) {
+                contentEl.innerHTML = 'Loading…';
+                fetch('/api/classes/' + classId + '/enrollments', { credentials: 'same-origin' })
+                    .then(function (r) {
+                        if (!r.ok) throw new Error('Failed to load');
+                        return r.json();
+                    })
+                    .then(function (list) {
+                        if (!Array.isArray(list) || list.length === 0) {
+                            contentEl.innerHTML = '<em>No students enrolled.</em>';
+                            return;
+                        }
+                        var html = '<table><thead><tr><th>Username</th><th>Name</th><th>Email</th><th>Grade</th><th>Actions</th></tr></thead><tbody>';
+                        list.forEach(function (s) {
+                            html += '<tr><td>' + escapeHtml(s.username) + '</td><td>' + escapeHtml(s.name) + '</td><td>' + escapeHtml(s.email || '') + '</td><td>' + escapeHtml(s.grade || '') + '</td><td>' +
+                                '<button type="button" class="btn btn-small btn-danger" data-class-id="' + classId + '" data-student-id="' + s.id + '" data-remove>Remove</button></td></tr>';
+                        });
+                        html += '</tbody></table>';
+                        contentEl.innerHTML = html;
+                        contentEl.querySelectorAll('[data-remove]').forEach(function (btn) {
+                            btn.addEventListener('click', function () {
+                                var cid = Number(btn.getAttribute('data-class-id'));
+                                var sid = Number(btn.getAttribute('data-student-id'));
+                                removeStudentFromClass(cid, sid, contentEl);
+                            });
+                        });
+                    })
+                    .catch(function () { contentEl.innerHTML = '<span class="error">Could not load enrollments.</span>'; });
+            }
+
+            function removeStudentFromClass(classId, studentId, contentEl) {
+                if (!confirm('Remove this student from the class?')) return;
+                fetch('/api/classes/' + classId + '/enrollments/' + studentId, { method: 'DELETE', credentials: 'same-origin' })
+                    .then(function (r) {
+                        if (!r.ok) throw new Error('Remove failed');
+                        loadEnrollments(classId, contentEl);
+                        load();
+                    })
+                    .catch(function () { alert('Could not remove student.'); });
+            }
+
+            document.getElementById('btn-create').addEventListener('click', openCreate);
+            document.getElementById('btn-cancel').addEventListener('click', function () {
+                formPanel.style.display = 'none';
+            });
+            document.getElementById('btn-save').addEventListener('click', function () {
+                var id = editId.value;
+                var payload = {
+                    name: document.getElementById('in-name').value.trim(),
+                    description: document.getElementById('in-description').value
+                };
+                if (!payload.name) { alert('Name is required'); return; }
+                var url = id ? '/api/classes/' + id : '/api/classes';
+                var opts = {
+                    method: id ? 'PATCH' : 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                };
+                fetch(url, opts)
+                    .then(function (r) {
+                        if (!r.ok) throw new Error(r.status === 400 ? 'Invalid data' : 'Request failed');
+                        formPanel.style.display = 'none';
+                        load();
+                    })
+                    .catch(function (e) { alert(e.message); });
+            });
+
+            load();
+        })();
+    </script>
+</body>
+</html>
